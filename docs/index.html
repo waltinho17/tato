@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src https://api.github.com; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Tato · Métricas do Mac e do Claude na Touch Bar</title>
+<meta name="description" content="Tato mostra temperatura, cooler, frequência, memória, rede, bateria e os limites do Claude direto na Touch Bar do seu MacBook Pro. Gratuito e de código aberto.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#141312">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+  :root {
+    --bg: #141312; --bg2: #1b1a18; --card: rgba(255,255,255,.045); --line: rgba(255,255,255,.09);
+    --cream: #f0eee6; --muted: #a8a29a; --clay: #d97757; --kraft: #d4a27f; --ok: #5fbf7a; --warn: #f0a53c;
+    --radius: 22px;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--cream); font: 17px/1.6 var(--font); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  img { max-width: 100%; display: block; }
+  .wrap { width: min(1120px, 100% - 40px); margin-inline: auto; }
+  section { padding: 96px 0; }
+  h1, h2, h3 { line-height: 1.1; letter-spacing: -.02em; margin: 0; }
+  h2 { font-size: clamp(30px, 4.4vw, 46px); }
+  h3 { font-size: 20px; letter-spacing: -.01em; }
+  .eyebrow { color: var(--clay); font-weight: 600; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 14px; }
+  .lead { color: var(--muted); font-size: 20px; max-width: 640px; margin: 18px 0 0; }
+  .center { text-align: center; } .center .lead { margin-inline: auto; }
+
+  /* nav */
+  nav { position: sticky; top: 0; z-index: 10; backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px); background: rgba(20,19,18,.72); border-bottom: 1px solid var(--line); }
+  nav .wrap { display: flex; align-items: center; gap: 28px; height: 60px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; text-decoration: none; }
+  .brand img { width: 28px; height: 28px; }
+  nav .links { display: flex; gap: 22px; margin-left: auto; font-size: 15px; color: var(--muted); }
+  nav .links a { text-decoration: none; } nav .links a:hover { color: var(--cream); }
+  @media (max-width: 760px) { nav .links { display: none; } nav .gh { margin-left: auto; } }
+  .gh { font-size: 14px; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; text-decoration: none; }
+  .gh:hover { background: var(--card); }
+
+  /* hero */
+  .hero { padding: 84px 0 64px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ""; position: absolute; inset: -20% -10% auto; height: 700px; background: radial-gradient(closest-side, rgba(217,119,87,.28), transparent 70%); pointer-events: none; }
+  .hero .icon { width: 128px; height: 128px; margin: 0 auto 28px; filter: drop-shadow(0 22px 40px rgba(0,0,0,.55)); }
+  .hero h1 { font-size: clamp(44px, 7vw, 76px); }
+  .hero h1 span { color: var(--clay); }
+  .hero .lead { margin-inline: auto; }
+  .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 34px; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; border-radius: 999px; padding: 15px 28px; font-weight: 600; font-size: 17px; text-decoration: none; border: 1px solid var(--line); transition: transform .15s, background .15s; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn.primary { background: var(--clay); border-color: var(--clay); color: #1a0f0a; box-shadow: 0 10px 34px rgba(217,119,87,.35); }
+  .btn.primary:hover { background: #e5886a; }
+  .btn.ghost { background: var(--card); }
+  .btn svg { width: 20px; height: 20px; }
+  .meta { color: var(--muted); font-size: 14px; margin-top: 16px; min-height: 22px; }
+
+  /* touch bar mock */
+  .device { margin: 64px auto 0; max-width: 980px; position: relative; }
+  .keyboard { background: linear-gradient(#242220, #1a1918); border: 1px solid var(--line); border-radius: 26px; padding: 22px 22px 26px; box-shadow: 0 40px 90px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06); }
+  .keys { display: flex; gap: 8px; margin-top: 14px; }
+  .keys i { flex: 1; height: 38px; border-radius: 8px; background: #2c2a28; border: 1px solid rgba(255,255,255,.05); }
+  .tb-row { display: flex; align-items: center; gap: 10px; }
+  .tb-row b { font-weight: 500; font-size: 12px; color: var(--muted); width: 38px; height: 34px; display: grid; place-items: center; border-radius: 8px; background: #2c2a28; }
+  .tb { flex: 1; background: #000; border-radius: 12px; padding: 5px 8px; border: 1px solid #2a2927; overflow: hidden; }
+  .tb img { width: 100%; height: auto; }
+  .tb-label { text-align: left; font-size: 13px; color: var(--muted); margin: 14px 0 6px 56px; }
+  .tb-label:first-child { margin-top: 0; }
+
+  /* cards */
+  .grid { display: grid; gap: 18px; margin-top: 56px; }
+  .g3 { grid-template-columns: repeat(3, 1fr); } .g2 { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 900px) { .g3 { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 620px) { .g3, .g2 { grid-template-columns: 1fr; } section { padding: 70px 0; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; }
+  .card p { color: var(--muted); margin: 10px 0 0; font-size: 16px; }
+  .card .ico { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: rgba(217,119,87,.14); color: var(--clay); margin-bottom: 18px; font-size: 22px; }
+
+  /* shots */
+  .shots { display: grid; grid-template-columns: 340px 1fr; gap: 28px; align-items: start; margin-top: 56px; }
+  @media (max-width: 860px) { .shots { grid-template-columns: 1fr; } }
+  .shot { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+  .shot img { border-radius: 12px; width: 100%; }
+  .shot figcaption { color: var(--muted); font-size: 14px; margin-top: 12px; }
+  figure { margin: 0; }
+  .stack { display: grid; gap: 22px; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .tabs button { font: inherit; font-size: 14px; color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { color: #1a0f0a; background: var(--cream); border-color: var(--cream); }
+
+  /* claude */
+  .claude { background: linear-gradient(180deg, transparent, rgba(217,119,87,.07) 40%, transparent); }
+  .claude-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: center; }
+  @media (max-width: 900px) { .claude-grid { grid-template-columns: 1fr; } }
+  .robot { width: 76px; height: auto; margin-bottom: 22px; image-rendering: pixelated; }
+  ul.ticks { list-style: none; padding: 0; margin: 26px 0 0; display: grid; gap: 12px; }
+  ul.ticks li { padding-left: 30px; position: relative; color: var(--muted); }
+  ul.ticks li b { color: var(--cream); font-weight: 600; }
+  ul.ticks li::before { content: ""; position: absolute; left: 0; top: 7px; width: 16px; height: 16px; border-radius: 50%; background: var(--clay) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 8.3l2.3 2.3 4.7-4.9' fill='none' stroke='%231a0f0a' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat; }
+  .note { margin-top: 24px; font-size: 14.5px; color: var(--muted); border-left: 3px solid var(--kraft); padding: 4px 0 4px 16px; }
+
+  /* table */
+  .table { width: 100%; border-collapse: collapse; margin-top: 48px; font-size: 16px; }
+  .table th, .table td { text-align: left; padding: 16px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .table th { color: var(--muted); font-weight: 500; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; }
+  .table td small { display: block; color: var(--muted); font-size: 14px; margin-top: 3px; }
+  .pill { display: inline-block; border-radius: 999px; padding: 3px 11px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .pill.ok { background: rgba(95,191,122,.15); color: var(--ok); }
+  .pill.warn { background: rgba(240,165,60,.15); color: var(--warn); }
+  .pill.dim { background: rgba(255,255,255,.07); color: var(--muted); }
+  .tablewrap { overflow-x: auto; }
+
+  /* steps */
+  .steps { counter-reset: s; display: grid; gap: 16px; margin-top: 48px; padding: 0; list-style: none; }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 44px 1fr; gap: 18px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 26px; }
+  .steps li::before { content: counter(s); width: 38px; height: 38px; border-radius: 50%; background: var(--clay); color: #1a0f0a; font-weight: 700; display: grid; place-items: center; }
+  .steps h3 { font-size: 18px; } .steps p { color: var(--muted); margin: 4px 0 0; font-size: 16px; }
+  code, kbd { font-family: var(--mono); font-size: .88em; background: rgba(255,255,255,.08); border-radius: 6px; padding: 2px 7px; }
+  pre { background: #0d0c0b; border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; overflow-x: auto; font: 14px/1.6 var(--mono); color: var(--cream); margin: 14px 0 0; }
+
+  /* form */
+  form { max-width: 640px; margin: 44px auto 0; display: grid; gap: 14px; text-align: left; }
+  label { font-size: 14px; color: var(--muted); display: grid; gap: 6px; }
+  input, select, textarea { font: inherit; color: var(--cream); background: #0f0e0d; border: 1px solid var(--line); border-radius: 12px; padding: 13px 14px; width: 100%; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--clay); outline-offset: 1px; }
+  textarea { min-height: 140px; resize: vertical; }
+  .form-note { font-size: 13.5px; color: var(--muted); }
+  .form-note.warn { color: var(--kraft); }
+
+  details { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px 22px; margin-top: 12px; }
+  summary { cursor: pointer; font-weight: 600; } details p { color: var(--muted); margin: 10px 0 0; font-size: 16px; }
+
+  footer { border-top: 1px solid var(--line); padding: 44px 0 60px; color: var(--muted); font-size: 14px; }
+  footer .wrap { display: grid; gap: 14px; }
+  footer .row { display: flex; gap: 22px; flex-wrap: wrap; align-items: center; }
+  footer a { text-decoration: underline; text-underline-offset: 3px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .btn { transition: none; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="icon.svg" alt="" width="28" height="28">Tato</a>
+    <div class="links">
+      <a href="#recursos">Recursos</a>
+      <a href="#telas">Telas</a>
+      <a href="#claude">Claude</a>
+      <a href="#compatibilidade">Compatibilidade</a>
+      <a href="#instalar">Instalar</a>
+      <a href="#sugestoes">Sugestões</a>
+    </div>
+    <a class="gh" href="https://github.com/waltinho17/tato" rel="noopener">GitHub</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <img class="icon" src="icon.svg" alt="Ícone do Tato: um T branco com um ponto laranja sobre fundo grafite" width="128" height="128">
+    <h1>Seu Mac e o Claude,<br>na <span>Touch Bar</span>.</h1>
+    <p class="lead">Temperatura, cooler, frequência, memória, rede, bateria e os limites do Claude, sempre à vista no seu MacBook Pro. Leve, gratuito e de código aberto.</p>
+    <div class="cta">
+      <a id="download" class="btn primary" href="https://github.com/waltinho17/tato/releases/latest" rel="noopener">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v10m0 0l-4-4m4 4l4-4M3.5 16.5h13"/></svg>
+        <span id="download-label">Baixar para macOS</span>
+      </a>
+      <a class="btn ghost" href="https://github.com/waltinho17/tato" rel="noopener">Ver código</a>
+    </div>
+    <p class="meta" id="download-meta">macOS 13 ou mais novo · MacBook Pro com Touch Bar</p>
+
+    <div class="device" aria-label="Exemplos da Touch Bar com o Tato">
+      <div class="keyboard">
+        <div class="tb-label">Modo Mac</div>
+        <div class="tb-row"><b>esc</b><div class="tb"><img src="assets/mac-bar.png" alt="Touch Bar com CPU, cooler, frequência, memória, uso, SSD e bateria" width="1464" height="80"></div></div>
+        <div class="tb-label">Modo Claude</div>
+        <div class="tb-row"><b>esc</b><div class="tb"><img src="assets/claude-bar.png" alt="Touch Bar com sessão, limite semanal, crédito, tokens do dia, atividade e status do Claude" width="1524" height="80"></div></div>
+        <div class="keys" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="recursos">
+  <div class="wrap">
+    <div class="center">
+      <div class="eyebrow">Recursos</div>
+      <h2>Tudo o que importa, num toque.</h2>
+      <p class="lead">Um botão fixo na Control Strip abre uma barra com os widgets que você escolher. Sem sudo, sem peso, sem ícone no Dock.</p>
+    </div>
+    <div class="grid g3">
+      <div class="card"><div class="ico">🌡️</div><h3>Temperatura e cooler</h3><p>CPU e GPU com cores por faixa, rotação da ventoinha e histórico em mini-gráficos.</p></div>
+      <div class="card"><div class="ico">⚡</div><h3>Frequência e uso</h3><p>Frequência de CPU e GPU, uso por núcleos de eficiência e desempenho, lidos sem sudo.</p></div>
+      <div class="card"><div class="ico">🧠</div><h3>Memória, rede e disco</h3><p>RAM, pressão de memória, download e upload, leitura e escrita do SSD e processos que mais pesam.</p></div>
+      <div class="card"><div class="ico">↔️</div><h3>Barra rolável</h3><p>Muitos widgets? A barra rola com o dedo. Reordene arrastando a linha inteira nas Preferências.</p></div>
+      <div class="card"><div class="ico">🔔</div><h3>Alertas</h3><p>Notificação quando a temperatura passar do limite, com intervalo para não incomodar.</p></div>
+      <div class="card"><div class="ico">✦</div><h3>Modo Claude</h3><p>Sessão, limite semanal, crédito e status do serviço, com o robozinho na Control Strip.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="telas" style="padding-top:0">
+  <div class="wrap">
+    <div class="center">
+      <div class="eyebrow">Telas</div>
+      <h2>Um painel completo na barra de menus.</h2>
+      <p class="lead">Clique no ícone para ver cada métrica com mínimo, média e máximo, além do uso do Claude.</p>
+    </div>
+    <div class="shots">
+      <figure class="shot"><img src="assets/dashboard.png" alt="Painel do Tato na barra de menus com CPU, memória, rede, bateria e Claude" width="680" height="1594" loading="lazy"><figcaption>Painel da barra de menus</figcaption></figure>
+      <div class="stack">
+        <figure class="shot">
+          <div class="tabs" role="tablist" aria-label="Telas de preferências">
+            <button role="tab" aria-selected="true" data-img="assets/prefs-tab0.png" data-alt="Preferências, aba Widgets, com lista para arrastar e reordenar">Widgets</button>
+            <button role="tab" aria-selected="false" data-img="assets/prefs-tab1.png" data-alt="Preferências, aba Geral">Geral</button>
+            <button role="tab" aria-selected="false" data-img="assets/prefs-tab2.png" data-alt="Preferências, aba Alertas">Alertas</button>
+            <button role="tab" aria-selected="false" data-img="assets/prefs-tab3.png" data-alt="Preferências, aba Claude, com limites do plano">Claude</button>
+            <button role="tab" aria-selected="false" data-img="assets/prefs-tab4.png" data-alt="Preferências, aba Ajuda, com o passo a passo">Ajuda</button>
+          </div>
+          <img id="prefs-img" src="assets/prefs-tab0.png" alt="Preferências, aba Widgets, com lista para arrastar e reordenar" width="1000" height="1064" loading="lazy">
+          <figcaption>Preferências com visual Liquid Glass no macOS 26 ou mais novo</figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="claude" class="claude">
+  <div class="wrap claude-grid">
+    <div>
+      <img class="robot" src="assets/robot.svg" alt="Robozinho pixelado do Claude" width="76" height="66">
+      <div class="eyebrow">Modo Claude</div>
+      <h2>Os limites do Claude, sem abrir nada.</h2>
+      <p class="lead">Um segundo botão, separado do modo Mac. Minimizado, é só o robozinho. Ao tocar, abre a barra com tudo.</p>
+      <ul class="ticks">
+        <li><b>Sessão de 5 horas e limite semanal</b> com barra e tempo para resetar.</li>
+        <li><b>Crédito extra do mês</b> e o uso semanal por origem: Claude Code, chats e Cowork.</li>
+        <li><b>Tokens de hoje por modelo</b>, atividade em tempo real e status do serviço.</li>
+        <li><b>Automático:</b> usa o login que o Claude Code já tem no Mac, o mesmo do terminal, do VS Code e do app.</li>
+        <li><b>Já aparece ao ligar o Mac.</b> O Tato abre no login e mostra os últimos valores na hora.</li>
+        <li><b>Só Mac, só Claude ou os dois.</b> Desligou? O botão some por completo.</li>
+      </ul>
+      <p class="note">O Tato é independente: não é afiliado nem endossado pela Anthropic. Os limites vêm de um endereço interno e não documentado, que pode mudar. Dá para desligar a qualquer momento nas Preferências.</p>
+    </div>
+    <figure class="shot"><img src="assets/claude-bar.png" alt="Barra do Claude na Touch Bar" width="1524" height="80" loading="lazy" style="background:#000;padding:6px;border-radius:12px"><div style="height:18px"></div><img src="assets/prefs-tab3.png" alt="Aba Claude das Preferências" width="1000" height="1064" loading="lazy"><figcaption>Barra e Preferências do modo Claude (dados de exemplo)</figcaption></figure>
+  </div>
+</section>
+
+<section id="compatibilidade">
+  <div class="wrap">
+    <div class="center">
+      <div class="eyebrow">Compatibilidade</div>
+      <h2>Feito para quem tem Touch Bar.</h2>
+      <p class="lead">Precisa de um MacBook Pro com Touch Bar e macOS 13 Ventura ou mais novo.</p>
+    </div>
+    <div class="tablewrap">
+      <table class="table">
+        <thead><tr><th>Mac</th><th>Chip</th><th>Situação</th></tr></thead>
+        <tbody>
+          <tr><td>MacBook Pro 13" (2020)<small>Testado no macOS 27</small></td><td>Apple M1</td><td><span class="pill ok">Testado</span><small>Todas as métricas e o modo Claude.</small></td></tr>
+          <tr><td>MacBook Pro 13" (2022)</td><td>Apple M2</td><td><span class="pill ok">Compatível</span><small>Mesmos sensores e APIs do M1, ainda não testado.</small></td></tr>
+          <tr><td>MacBook Pro 13", 15" e 16" (2016 a 2020)</td><td>Intel</td><td><span class="pill warn">Parcial</span><small>Temperatura e cooler pelo SMC, ainda não testados. Sem frequência de CPU e GPU. O modo Claude funciona em qualquer Mac.</small></td></tr>
+          <tr><td>Macs sem Touch Bar</td><td>Qualquer</td><td><span class="pill dim">Sem botão</span><small>Não há Touch Bar. O painel da barra de menus pode funcionar, mas não é o foco.</small></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">O Tato usa APIs privadas da Apple para fixar o botão na Control Strip e ler sensores. Uma atualização do macOS pode quebrar algo. Se isso acontecer, o menu mostra um aviso. As métricas que o seu Mac não lê somem sozinhas.</p>
+  </div>
+</section>
+
+<section id="instalar" style="padding-top:0">
+  <div class="wrap">
+    <div class="center">
+      <div class="eyebrow">Instalar</div>
+      <h2>Pronto em um minuto.</h2>
+    </div>
+    <ol class="steps">
+      <li><div><h3>Baixe e abra</h3><p>Baixe o <code>.zip</code> acima, descompacte e arraste o <b>Tato</b> para Aplicativos. Como o app não é notarizado, o macOS pode bloquear o primeiro uso. Rode isto uma vez no Terminal:</p><pre>xattr -cr /Applications/Tato.app</pre></div></li>
+      <li><div><h3>Deixe a Control Strip visível</h3><p>Em Ajustes do Sistema, Teclado, Configurações da Touch Bar, escolha “Controles do app” e mantenha a Control Strip ativada. Os nomes variam um pouco conforme o macOS.</p></div></li>
+      <li><div><h3>Toque no botão</h3><p>À direita da Touch Bar, junto de brilho e volume, aparece o botão do Tato. Toque para abrir a barra e use o ✕ para fechar.</p></div></li>
+      <li><div><h3>Escolha o que mostrar</h3><p>Ícone na barra de menus, Preferências: marque, arraste para reordenar, escolha até 2 valores para o botão e, se quiser, ative o modo Claude.</p></div></li>
+    </ol>
+    <p class="note" style="max-width:760px;margin-inline:auto">Prefere compilar? Clone o repositório e rode <code>make run</code>. Só é preciso o Xcode Command Line Tools.</p>
+  </div>
+</section>
+
+<section id="seguranca" style="padding-top:0">
+  <div class="wrap">
+    <div class="center">
+      <div class="eyebrow">Privacidade e segurança</div>
+      <h2>Seus dados ficam com você.</h2>
+      <p class="lead">O código é aberto e pequeno, sem bibliotecas de terceiros, sem análise de uso e sem servidor próprio.</p>
+    </div>
+    <div class="grid g2">
+      <div class="card"><h3>O que sai do seu Mac</h3><p>Apenas duas consultas: o status público em <code>status.claude.com</code> e, no modo Claude, a consulta dos limites em <code>api.anthropic.com</code> com o seu próprio login. Nada vai para o autor do app.</p></div>
+      <div class="card"><h3>Login do Claude</h3><p>Lido do Chaveiro só com a sua permissão, mantido apenas na memória e enviado somente ao endereço da Anthropic, sem seguir redirecionamentos e sem cache em disco. Nunca é gravado nem registrado.</p></div>
+      <div class="card"><h3>Conversas</h3><p>Os tokens vêm dos logs locais do Claude Code, lendo apenas data, modelo e contagem. O texto das conversas nunca é lido nem enviado.</p></div>
+      <div class="card"><h3>Sem sudo e sem rede de fundo</h3><p>Nenhuma leitura exige administrador. Dá para desligar o modo Claude, e com ele a consulta, nas Preferências.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="sugestoes" class="center" style="padding-top:0">
+  <div class="wrap">
+    <div class="eyebrow">Sugestões</div>
+    <h2>Faltou alguma coisa?</h2>
+    <p class="lead">Conte o que você gostaria de ver no Tato: uma métrica, um Mac que não funcionou, uma ideia.</p>
+    <form id="feedback" novalidate>
+      <label>Tipo
+        <select id="fb-type">
+          <option value="Sugestão">Sugestão</option>
+          <option value="Problema">Problema em um Mac</option>
+          <option value="Elogio">Elogio</option>
+        </select>
+      </label>
+      <label>Sua mensagem
+        <textarea id="fb-msg" maxlength="1500" placeholder="Qual Mac você usa, o que esperava ver e o que aconteceu?" required></textarea>
+      </label>
+      <label id="fb-email-wrap" hidden>Seu e-mail (opcional, para eu responder)
+        <input id="fb-email" type="email" maxlength="120" placeholder="voce@exemplo.com" autocomplete="email">
+      </label>
+      <button class="btn primary" type="submit" style="justify-content:center;border:0;cursor:pointer;font-family:inherit">Enviar sugestão</button>
+      <p class="form-note" id="fb-note"></p>
+    </form>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap" style="max-width:820px">
+    <div class="center"><h2>Perguntas frequentes</h2></div>
+    <details><summary>O macOS diz que o app está danificado ou de desenvolvedor não identificado.</summary><p>O Tato é gratuito e não é notarizado pela Apple. Rode <code>xattr -cr /Applications/Tato.app</code> no Terminal e abra de novo.</p></details>
+    <details><summary>O botão não aparece na Touch Bar.</summary><p>Confira em Ajustes do Sistema, Teclado, Configurações da Touch Bar, se a Control Strip está ativa e se o modo não é “Control Strip expandida”. Depois reabra o Tato.</p></details>
+    <details><summary>Uma métrica aparece como “–” ou sumiu.</summary><p>O seu Mac não lê essa métrica. Rode <code>make probe</code> no repositório para ver exatamente o que cada sensor devolve. A temperatura da GPU também mostra “–” quando ela está parada.</p></details>
+    <details><summary>O uso do login do Claude é permitido?</summary><p>O Tato lê o seu próprio login, no seu próprio Mac, e consulta um endereço interno que não é documentado pela Anthropic. Isso pode mudar ou ser restringido a qualquer momento, e a decisão de usar é sua. O recurso vem com opção de desligar.</p></details>
+    <details><summary>Como desinstalar?</summary><p>Feche o Tato, apague-o da pasta Aplicativos e, se tiver ativado, remova-o de Ajustes do Sistema, Geral, Itens de Início.</p></details>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="row"><a href="https://github.com/waltinho17/tato" rel="noopener">Código no GitHub</a><a href="https://github.com/waltinho17/tato/releases" rel="noopener">Versões</a><a href="https://github.com/waltinho17/tato/issues" rel="noopener">Issues</a><a href="https://github.com/waltinho17/tato/blob/main/LICENSE" rel="noopener">Licença MIT</a></div>
+    <div>Tato é um projeto independente. Mac, MacBook Pro e Touch Bar são marcas da Apple Inc. Claude é marca da Anthropic. Este projeto não é afiliado, patrocinado nem endossado por nenhuma das duas. O robozinho é uma aproximação desenhada à mão.</div>
+    <div>Técnicas inspiradas em projetos MIT: MTMR, Stats e macmon.</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var REPO = "waltinho17/tato";
+  // Para receber as sugestões por e-mail, coloque um endereço aqui. Ele ficará público no código da página.
+  // Vazio: o formulário abre uma issue pública no GitHub.
+  var FEEDBACK_EMAIL = "";
+
+  // Download: busca o último release e aponta o botão direto para o .zip.
+  var btn = document.getElementById("download");
+  var label = document.getElementById("download-label");
+  var meta = document.getElementById("download-meta");
+  fetch("https://api.github.com/repos/" + REPO + "/releases/latest", { headers: { Accept: "application/vnd.github+json" } })
+    .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+    .then(function (rel) {
+      var assets = rel.assets || [];
+      var zip = assets.filter(function (a) { return /\.zip$/i.test(a.name); })[0] || assets[0];
+      var prefix = "https://github.com/" + REPO + "/";
+      if (zip && typeof zip.browser_download_url === "string" && zip.browser_download_url.indexOf(prefix) === 0) {
+        btn.href = zip.browser_download_url;
+        label.textContent = "Baixar Tato " + String(rel.tag_name || "").replace(/^v/, "");
+        var mb = zip.size ? " · " + (zip.size / 1048576).toFixed(1).replace(".", ",") + " MB" : "";
+        meta.textContent = "macOS 13 ou mais novo · MacBook Pro com Touch Bar" + mb;
+      }
+    })
+    .catch(function () { /* mantém o link para a página de versões */ });
+
+  // Abas das preferências
+  var img = document.getElementById("prefs-img");
+  var tabs = document.querySelectorAll(".tabs button");
+  tabs.forEach(function (t) {
+    t.addEventListener("click", function () {
+      tabs.forEach(function (o) { o.setAttribute("aria-selected", o === t ? "true" : "false"); });
+      img.src = t.getAttribute("data-img");
+      img.alt = t.getAttribute("data-alt");
+    });
+  });
+
+  // Sugestões: e-mail se configurado, senão uma issue pública no GitHub.
+  var form = document.getElementById("feedback");
+  var note = document.getElementById("fb-note");
+  var emailWrap = document.getElementById("fb-email-wrap");
+  if (FEEDBACK_EMAIL) {
+    emailWrap.hidden = false;
+    note.textContent = "A mensagem será aberta no seu app de e-mail para você enviar.";
+  } else {
+    note.textContent = "Isto abre uma issue pública no GitHub. Não inclua dados pessoais ou sensíveis.";
+    note.className = "form-note warn";
+  }
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var type = document.getElementById("fb-type").value;
+    var msg = document.getElementById("fb-msg").value.trim();
+    if (!msg) { note.textContent = "Escreva uma mensagem antes de enviar."; note.className = "form-note warn"; return; }
+    var title = "[" + type + "] " + msg.split("\n")[0].slice(0, 70);
+    if (FEEDBACK_EMAIL) {
+      var from = document.getElementById("fb-email").value.trim();
+      var body = msg + (from ? "\n\nResponder para: " + from : "");
+      window.location.href = "mailto:" + encodeURIComponent(FEEDBACK_EMAIL) + "?subject=" + encodeURIComponent("Tato: " + title) + "&body=" + encodeURIComponent(body);
+    } else {
+      window.open("https://github.com/" + REPO + "/issues/new?title=" + encodeURIComponent(title) + "&body=" + encodeURIComponent(msg), "_blank", "noopener");
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 13" width="150" height="130" shape-rendering="crispEdges" role="img" aria-label="Robozinho do Claude">
+  <rect x="2" y="0" width="11" height="10" fill="#D97757"/>
+  <rect x="0" y="3" width="2" height="4" fill="#D97757"/>
+  <rect x="13" y="3" width="2" height="4" fill="#D97757"/>
+  <rect x="2" y="10" width="1" height="3" fill="#D97757"/>
+  <rect x="5" y="10" width="1" height="3" fill="#D97757"/>
+  <rect x="9" y="10" width="1" height="3" fill="#D97757"/>
+  <rect x="12" y="10" width="1" height="3" fill="#D97757"/>
+  <rect x="4" y="2" width="1" height="2" fill="#1F1E1D"/>
+  <rect x="10" y="2" width="1" height="2" fill="#1F1E1D"/>
+</svg>
