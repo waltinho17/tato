@@ -32,10 +32,11 @@ final class AlertManager: NSObject, UNUserNotificationCenterDelegate {
         guard h.temp >= limit, armed, lastSent.map({ Date().timeIntervalSince($0) > 600 }) ?? true else { return }
         armed = false
         lastSent = Date()
-        send(title: "Temperatura alta", body: String(format: "%@ em %.0f°C, acima do limite de %.0f°C.", h.name, h.temp, limit))
+        send(title: tr("Temperatura alta", "High temperature"),
+             body: String(format: tr("%@ em %.0f°C, acima do limite de %.0f°C.", "%@ at %.0f°C, above your %.0f°C limit."), h.name, h.temp, limit))
     }
 
-    func sendTest() { send(title: "Alerta de teste", body: "As notificações estão funcionando.") }
+    func sendTest() { send(title: tr("Alerta de teste", "Test alert"), body: tr("As notificações estão funcionando.", "Notifications are working.")) }
 
     private func send(title: String, body: String) {
         guard Self.canNotify else { return }

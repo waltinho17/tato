@@ -1,200 +1,200 @@
 <p align="center">
-  <img src="docs/icon.svg" width="128" alt="Ícone do Tato">
+  <img src="docs/icon.svg" width="128" alt="Tato app icon">
 </p>
 
 <h1 align="center">Tato</h1>
 
 <p align="center">
-  <b>Métricas do Mac e do Claude na Touch Bar.</b><br>
-  Temperatura, cooler, frequência, memória, rede, bateria e os limites do Claude, sempre à vista.
+  <b>Mac and Claude metrics on the Touch Bar.</b><br>
+  Temperature, fan, frequency, memory, network, battery and your Claude usage limits, always in sight.
 </p>
 
 <p align="center">
   <a href="https://github.com/waltinho17/tato/releases/latest"><img alt="Download" src="https://img.shields.io/github/v/release/waltinho17/tato?label=download&color=D97757"></a>
   <img alt="macOS 13+" src="https://img.shields.io/badge/macOS-13%2B-blue">
   <img alt="Apple Silicon" src="https://img.shields.io/badge/Apple%20Silicon-M1%20%7C%20M2-green">
-  <img alt="Touch Bar" src="https://img.shields.io/badge/MacBook%20Pro-com%20Touch%20Bar-lightgrey">
-  <img alt="Licença MIT" src="https://img.shields.io/badge/licen%C3%A7a-MIT-yellow">
+  <img alt="Touch Bar" src="https://img.shields.io/badge/MacBook%20Pro-with%20Touch%20Bar-lightgrey">
+  <img alt="MIT license" src="https://img.shields.io/badge/license-MIT-yellow">
 </p>
 
 <p align="center">
-  <a href="https://waltinho17.github.io/tato/">Site</a> ·
-  <a href="https://github.com/waltinho17/tato/releases/latest">Baixar</a> ·
-  <a href="#primeiros-passos">Primeiros passos</a> ·
-  <a href="#modo-claude">Modo Claude</a> ·
-  <a href="#privacidade-e-seguran%C3%A7a">Segurança</a>
+  <a href="README.pt-BR.md">Português</a> · <b>English</b><br>
+  <a href="https://waltinho17.github.io/tato/">Website</a> ·
+  <a href="https://github.com/waltinho17/tato/releases/latest">Download</a> ·
+  <a href="#getting-started">Getting started</a> ·
+  <a href="#claude-mode">Claude mode</a> ·
+  <a href="#privacy-and-security">Security</a>
 </p>
 
 <p align="center">
-  <img src="docs/assets/mac-bar.png" alt="Touch Bar no modo Mac" width="720"><br>
-  <img src="docs/assets/claude-bar.png" alt="Touch Bar no modo Claude" width="720">
+  <img src="docs/assets/en/mac-bar.png" alt="Touch Bar in Mac mode" width="720"><br>
+  <img src="docs/assets/en/claude-bar.png" alt="Touch Bar in Claude mode" width="720">
 </p>
 
-> Os prints do modo Claude usam dados de exemplo. Os do modo Mac são renderizações do app.
+> The Claude mode shots use sample data. The Mac mode shots are renders made by the app itself.
 
-## O que é
+## What it is
 
-O Tato fixa um botão na **Control Strip** da Touch Bar (à direita, junto de brilho e volume). Tocar nele abre uma barra com os widgets que você escolher. Um painel na barra de menus mostra o mesmo e mais, com mínimo, média e máximo.
+Tato pins a button to the **Control Strip** of the Touch Bar (on the right, next to brightness and volume). Tapping it opens a bar with the widgets you choose. A panel in the menu bar shows the same and more, with min, average and max.
 
-Foi feito para um MacBook Pro com Touch Bar, é leve (cerca de 0% de CPU em repouso), não precisa de `sudo` e não tem ícone no Dock.
+It is made for a MacBook Pro with a Touch Bar, it is light (about 0% CPU at rest), needs no `sudo` and has no Dock icon.
 
-## Recursos
+## Features
 
-**Métricas do Mac**
+**Mac metrics**
 
-| Métrica | De onde vem |
+| Metric | Source |
 |---|---|
-| Temperatura de CPU e GPU | sensores HID (`pACC`, `eACC`, `GPU MTR`), chaves SMC se existirem |
-| Rotação do cooler | SMC |
-| Frequência de CPU e GPU | `libIOReport` com as tabelas de frequência do `pmgr` |
-| Uso da CPU, núcleos E e P | `host_processor_info` |
-| Memória e pressão de memória | `host_statistics64`, `sysctl` |
-| Rede (download e upload), disco (leitura e escrita) | `getifaddrs`, `IOBlockStorageDriver` |
-| Armazenamento, bateria, saúde e ciclos | APIs públicas e `AppleSmartBattery` |
-| Processos que mais usam CPU e RAM | `libproc`, agrupados por app |
+| CPU and GPU temperature | HID sensors (`pACC`, `eACC`, `GPU MTR`), SMC keys when present |
+| Fan speed | SMC |
+| CPU and GPU frequency | `libIOReport` with the `pmgr` frequency tables |
+| CPU usage, E and P cores | `host_processor_info` |
+| Memory and memory pressure | `host_statistics64`, `sysctl` |
+| Network (down/up), disk (read/write) | `getifaddrs`, `IOBlockStorageDriver` |
+| Storage, battery, health and cycles | public APIs and `AppleSmartBattery` |
+| Top processes by CPU and RAM | `libproc`, grouped by app |
 
 **Interface**
 
-- Botão fixo na Control Strip com até 2 valores, e barra completa ao tocar.
-- Barra **rolável**: quantos widgets você quiser, deslize o dedo para ver todos.
-- Painel na barra de menus com cartões, barras coloridas, mini-gráficos e mín/méd/máx.
-- Preferências com widgets **arrastáveis** (a linha inteira), estilo da barra de menus (valores, com rótulo ou só ícone) e visual Liquid Glass no macOS 26 ou mais novo.
-- Alertas de temperatura por notificação, com intervalo mínimo de 10 minutos.
-- Abrir ao iniciar sessão.
-- Métricas que o seu Mac não lê **somem sozinhas**. Se um sensor parar depois de uma atualização do macOS, o menu avisa.
+- A pinned Control Strip button with up to 2 values, and a full bar when tapped.
+- A **scrollable** bar: as many widgets as you like, swipe to see them all.
+- A menu bar panel with cards, coloured bars, sparklines and min/avg/max.
+- Preferences with **draggable** widgets (the whole row), menu bar style (values, labelled or icon only) and a Liquid Glass look on macOS 26 and newer.
+- **English and Portuguese**, following the system language (switchable in Preferences).
+- Temperature alerts through notifications, with a 10-minute cool-down.
+- Launch at login.
+- Metrics your Mac cannot read **disappear by themselves**. If a sensor stops after a macOS update, the menu warns you.
 
 <p align="center">
-  <img src="docs/assets/dashboard.png" alt="Painel da barra de menus" width="340">
-  <img src="docs/assets/prefs-tab0.png" alt="Preferências, aba Widgets" width="420">
+  <img src="docs/assets/en/dashboard.png" alt="Menu bar panel" width="340">
+  <img src="docs/assets/en/prefs-tab0.png" alt="Preferences, Widgets tab" width="420">
 </p>
 
-## Compatibilidade
+## Compatibility
 
-Precisa de um MacBook Pro **com Touch Bar** e **macOS 13 Ventura ou mais novo**.
+You need a MacBook Pro **with a Touch Bar** and **macOS 13 Ventura or newer**.
 
-| Mac | Chip | Situação |
+| Mac | Chip | Status |
 |---|---|---|
-| MacBook Pro 13" (2020) | Apple M1 | **Testado** no macOS 27. Todas as métricas e o modo Claude. |
-| MacBook Pro 13" (2022) | Apple M2 | Compatível, mesmos sensores e APIs do M1. **Ainda não testado.** |
-| MacBook Pro 13", 15" e 16" (2016 a 2020) | Intel | **Parcial e não testado.** Temperatura e cooler pelo SMC. Sem frequência de CPU e GPU. O modo Claude não depende do hardware. |
-| Macs sem Touch Bar | qualquer | Não há Touch Bar. O painel da barra de menus pode funcionar, mas não é o foco. |
+| MacBook Pro 13" (2020) | Apple M1 | **Tested** on macOS 27. All metrics and Claude mode. |
+| MacBook Pro 13" (2022) | Apple M2 | Compatible, same sensors and APIs as the M1. **Not tested yet.** |
+| MacBook Pro 13", 15" and 16" (2016 to 2020) | Intel | **Partial and untested.** Temperature and fan via SMC. No CPU/GPU frequency. Claude mode does not depend on hardware. |
+| Macs without a Touch Bar | any | There is no Touch Bar. The menu bar panel may work, but it is not the focus. |
 
-Se você testar em outro Mac, rode `make probe` e abra uma issue com o resultado. Isso ajuda a ampliar a tabela.
+If you try it on another Mac, run `make probe` and open an issue with the result. It helps grow this table.
 
-## Instalação
+## Install
 
-1. Baixe o `.zip` na [página de versões](https://github.com/waltinho17/tato/releases/latest), descompacte e arraste o **Tato** para Aplicativos.
-2. O app não é notarizado pela Apple. Se o macOS bloquear, rode uma vez:
+1. Download the `.zip` from the [releases page](https://github.com/waltinho17/tato/releases/latest), unzip it and drag **Tato** to Applications.
+2. The app is not notarised by Apple. If macOS blocks it, run this once:
    ```bash
    xattr -cr /Applications/Tato.app
    ```
-3. Abra o Tato. O ícone aparece na barra de menus.
+3. Open Tato. The icon appears in the menu bar.
 
-Para compilar do código-fonte (precisa do Xcode Command Line Tools):
+To build from source (needs the Xcode Command Line Tools):
 
 ```bash
 git clone https://github.com/waltinho17/tato.git
 cd tato
-make run      # compila, assina ad-hoc e abre
-make probe    # imprime todas as leituras no terminal e sai
-make pkg      # gera o instalador .pkg
+make run      # builds, ad-hoc signs and opens
+make probe    # prints every reading to the terminal and exits
+make pkg      # builds the .pkg installer
 ```
 
-## Primeiros passos
+## Getting started
 
-1. **Abra o app.** Na primeira execução, as Preferências abrem na aba Ajuda com este passo a passo.
-2. **Deixe a Control Strip visível.** Em Ajustes do Sistema, Teclado, Configurações da Touch Bar, escolha "Controles do app" e mantenha a Control Strip ativada. Evite "Control Strip expandida". Os nomes variam um pouco conforme a versão do macOS.
-3. **Procure o botão** à direita da Touch Bar, perto de brilho e volume.
-4. **Toque nele** para abrir a barra completa. O ✕ fecha.
-5. **Escolha o que mostrar** em Preferências, aba Widgets: marque, arraste para reordenar e use "Fixo" para até 2 valores no botão.
+1. **Open the app.** On the first run, Preferences opens on the Help tab with these steps.
+2. **Keep the Control Strip visible.** In System Settings, Keyboard, Touch Bar Settings, choose "App Controls" and keep the Control Strip on. Avoid "Expanded Control Strip". Names vary a little between macOS versions.
+3. **Look for the button** on the right of the Touch Bar, near brightness and volume.
+4. **Tap it** to open the full bar. The ✕ closes it.
+5. **Choose what to show** in Preferences, Widgets tab: tick, drag to reorder and use "Pinned" for up to 2 values on the button.
 
-Nada aparece? Confira o passo 2 e reabra o app. Um valor `–` significa que o Mac não lê aquela métrica.
+Nothing shows up? Check step 2 and reopen the app. A `–` value means your Mac cannot read that metric.
 
-## Modo Claude
+## Claude mode
 
-Um segundo botão na Control Strip, **independente** do modo Mac. Minimizado, é só o robozinho. Ative em Preferências, aba Claude.
+A second Control Strip button, **independent** from the Mac mode. Minimised, it is just the little robot. Turn it on in Preferences, Claude tab.
 
-<p align="center"><img src="docs/assets/prefs-tab3.png" alt="Preferências, aba Claude" width="460"></p>
+<p align="center"><img src="docs/assets/en/prefs-tab3.png" alt="Preferences, Claude tab" width="460"></p>
 
-- **Limites reais do plano:** sessão de 5 horas e semanal, com barra e tempo para resetar.
-- **Crédito extra do mês**, quando a conta tem uso extra ativado, e o **uso semanal por origem** (Claude Code, chats, Cowork).
-- **Hoje por modelo**, tokens das últimas 5 horas e de 7 dias, atividade em tempo real e status do serviço.
-- **Automático:** usa o login que o Claude Code já guarda no Chaveiro, o mesmo do terminal, da extensão do VS Code e do app. O macOS pede permissão na primeira vez. Escolha "Permitir sempre".
-- **Já aparece ao ligar o Mac:** ao ativar, o Tato liga "Abrir ao iniciar sessão" e mostra os últimos valores conhecidos na hora.
-- **O que mostrar:** em Geral, "Touch Bar mostra" aceita Mac e Claude, só métricas do Mac ou só Claude. Desligar o modo Claude **remove o botão por completo**.
+- **Real plan limits:** the 5-hour session and the weekly limit, with a bar and the time until reset.
+- **Monthly extra credit**, when the account has extra usage enabled, and **weekly usage by source** (Claude Code, chats, Cowork).
+- **Today by model**, tokens for the last 5 hours and 7 days, live activity and service status.
+- **Automatic:** it uses the login Claude Code already keeps in the Keychain, the same one used by the terminal, the VS Code extension and the app. macOS asks for permission the first time. Choose "Always Allow".
+- **There when you start your Mac:** turning it on also enables "Launch at login", and the last known values show instantly.
+- **What to show:** in General, "Touch Bar shows" accepts Mac and Claude, Mac metrics only or Claude only. Turning Claude mode off **removes the button completely**.
 
-> **Aviso.** Os limites vêm de um endereço interno e **não documentado** da Anthropic (`/api/oauth/usage`), consultado com o seu próprio login, a cada 5 minutos. Ele pode mudar, ser limitado ou ser restringido a qualquer momento, e a decisão de usá-lo é sua. Dá para desligar em "Usar o login do Claude Code". Os tokens e o status do serviço funcionam mesmo sem ele.
+> **Heads up.** The limits come from an internal, **undocumented** Anthropic endpoint (`/api/oauth/usage`), queried with your own login every 5 minutes. It may change, be rate-limited or be restricted at any time, and the decision to use it is yours. You can turn it off with "Use the Claude Code login". Tokens and service status keep working without it.
 
-## Privacidade e segurança
+## Privacy and security
 
-O código é pequeno, aberto e **não usa nenhuma biblioteca de terceiros**. Não há análise de uso, servidor próprio nem conta.
+The code is small, open and uses **no third-party libraries**. There is no analytics, no server of its own and no account.
 
-**O que o app envia pela rede**, e só isso:
+**What the app sends over the network**, and nothing else:
 
-| Destino | Quando | O que vai |
+| Destination | When | What goes |
 |---|---|---|
-| `status.claude.com` | modo Claude ligado, a cada 2 min | nada além de uma requisição pública |
-| `api.anthropic.com/api/oauth/usage` | modo Claude ligado e "usar o login" ligado, a cada 5 min | o token de acesso do seu login, no cabeçalho `Authorization` |
+| `status.claude.com` | Claude mode on, every 2 min | nothing beyond a public request |
+| `api.anthropic.com/api/oauth/usage` | Claude mode and "use the login" on, every 5 min | your access token, in the `Authorization` header |
 
-**Sobre o login do Claude**
+**About the Claude login**
 
-- É lido do Chaveiro **somente com a sua permissão** (o macOS mostra um aviso na primeira vez).
-- Fica **só na memória**. Nunca é gravado em arquivo, em `UserDefaults` nem em log.
-- Vai apenas para o endereço fixo da Anthropic, por HTTPS (TLS 1.2 ou mais novo), numa sessão **efêmera**: sem cache em disco, sem cookies e **sem seguir redirecionamentos**, para que o token nunca seja encaminhado a outro destino.
-- O app **não renova** o token. Se expirar, ele pede para você abrir o Claude Code.
+- It is read from the Keychain **only with your permission** (macOS shows a prompt the first time).
+- It lives **only in memory**. It is never written to a file, to `UserDefaults` or to a log.
+- It goes only to the fixed Anthropic address over HTTPS (TLS 1.2 or newer), in an **ephemeral** session: no disk cache, no cookies and **no redirects followed**, so the token can never be forwarded elsewhere.
+- The app **does not renew** the token. If it expires, it asks you to open Claude Code.
 
-**Sobre as suas conversas**
+**About your conversations**
 
-- Os tokens são estimados a partir dos logs locais do Claude Code (`~/.claude/projects`). O app lê apenas **data, modelo e contagem de tokens**. O texto das conversas nunca é guardado nem enviado.
+- Tokens are estimated from the local Claude Code logs (`~/.claude/projects`). The app reads only **date, model and token counts**. Conversation text is never stored or sent.
 
-**O que fica no seu Mac:** as preferências e, para mostrar valores logo após reiniciar, a última leitura dos limites (percentuais, horários de reset e valores de crédito) em `UserDefaults`. Nenhum token.
+**What stays on your Mac:** your preferences and, so values show right after a restart, the last limits reading (percentages, reset times and credit amounts) in `UserDefaults`. No token.
 
-**Limites conhecidos**
+**Known limits**
 
-- Usa **APIs privadas** da Apple (Control Strip, SMC, HID, IOReport). Por isso não pode ser sandboxed nem publicado na App Store, e pode quebrar em atualizações do macOS.
-- O app é assinado com assinatura ad-hoc e **não é notarizado**. Baixe apenas do repositório oficial e confira o `SHA256SUMS` do release.
-- Os modos de depuração (`--probe`, `--snapshot`, `--demo`, `--prefs`) só funcionam quando o app é iniciado por linha de comando e não leem nada além do que o app já lê.
+- It uses **private Apple APIs** (Control Strip, SMC, HID, IOReport). That is why it cannot be sandboxed or shipped on the App Store, and it can break on macOS updates.
+- The app is ad-hoc signed and **not notarised**. Download only from the official repository and check the release's `SHA256SUMS`.
+- The debug modes (`--probe`, `--snapshot`, `--demo`, `--prefs`, `--lang`) only work when the app is started from the command line and read nothing beyond what the app already reads.
 
-Encontrou um problema de segurança? Abra uma issue sem detalhes sensíveis ou fale com o autor pelo perfil do GitHub.
+Found a security problem? Open an issue without sensitive details, or reach the author through the GitHub profile.
 
-## Como funciona
+## How it works
 
-- **Control Strip:** `+[NSTouchBarItem addSystemTrayItem:]` e `DFRElementSetControlStripPresenceForIdentifier`, carregados em tempo de execução com `dlopen`, a mesma técnica do [MTMR](https://github.com/Toxblh/MTMR). A barra de widgets é um `NSScrubber`.
-- **Sensores:** `IOHIDEventSystemClient` para temperatura, `AppleSMC` para cooler, `libIOReport` e o `pmgr` para frequência, como no [macmon](https://github.com/vladkens/macmon). As chaves SMC vêm do [Stats](https://github.com/exelban/stats).
-- **Claude:** logs locais em leitura incremental e deduplicada, a página de status pública e o endpoint de uso com o login do Claude Code.
+- **Control Strip:** `+[NSTouchBarItem addSystemTrayItem:]` and `DFRElementSetControlStripPresenceForIdentifier`, loaded at runtime with `dlopen`, the same technique as [MTMR](https://github.com/Toxblh/MTMR). The widget bar is an `NSScrubber`.
+- **Sensors:** `IOHIDEventSystemClient` for temperature, `AppleSMC` for the fan, `libIOReport` and `pmgr` for frequency, as in [macmon](https://github.com/vladkens/macmon). SMC keys come from [Stats](https://github.com/exelban/stats).
+- **Claude:** local logs read incrementally and de-duplicated, the public status page, and the usage endpoint with the Claude Code login.
 
 ```
 Sources/touchbar-temp/
-  Metrics/       fontes de dados (SMC, HID, IOReport, rede, disco, processos) e o motor
-  TouchBar/      APIs privadas da Touch Bar, controlador, widgets e painel
-  Claude/        logs, limites, status, botão e barra do modo Claude
-  Preferences/   janela de Preferências em SwiftUI
-  Palette.swift  paleta única do app
-Tools/make-icon.swift   gera o ícone do app
-docs/                   site (GitHub Pages) e imagens
+  Metrics/       data sources (SMC, HID, IOReport, network, disk, processes) and the engine
+  TouchBar/      private Touch Bar APIs, controller, widgets and the panel
+  Claude/        logs, limits, status, button and bar of the Claude mode
+  Preferences/   SwiftUI Preferences window
+  Palette.swift  one palette for the whole app
+  Localization.swift  English and Portuguese
+Tools/make-icon.swift   generates the app icon
+Tools/site/             generates the bilingual website
+docs/                   website (GitHub Pages) and images
 ```
 
-## Solução de problemas
+## Troubleshooting
 
-| Sintoma | O que fazer |
+| Symptom | What to do |
 |---|---|
-| O botão não aparece | Confira a Control Strip em Configurações da Touch Bar e reabra o app. |
-| Métrica com `–` | O Mac não lê essa métrica. Rode `make probe` para ver cada sensor. |
-| GPU mostra `–` | A GPU está parada e os sensores devolvem um valor fixo. É esperado. |
-| Aviso laranja no menu | Um sensor ou API parou de responder, talvez após atualizar o macOS. Abra uma issue com o `make probe`. |
-| Claude "sem login" | Entre no Claude Code uma vez. Se estiver "expirado", abra o Claude Code para renovar. |
-| macOS bloqueia o app | `xattr -cr /Applications/Tato.app` |
+| The button does not appear | Check the Control Strip in Touch Bar Settings and reopen the app. |
+| A metric shows `–` | Your Mac cannot read it. Run `make probe` to see each sensor. |
+| GPU shows `–` | The GPU is idle and its sensors return a fixed value. That is expected. |
+| Orange warning in the menu | A sensor or API stopped responding, maybe after a macOS update. Open an issue with the `make probe` output. |
+| Claude "not signed in" | Sign in to Claude Code once. If it says "expired", open Claude Code to renew it. |
+| macOS blocks the app | `xattr -cr /Applications/Tato.app` |
 
-## Créditos e avisos
+## Credits and notices
 
-Técnicas inspiradas em projetos MIT: [MTMR](https://github.com/Toxblh/MTMR), [Stats](https://github.com/exelban/stats) e [macmon](https://github.com/vladkens/macmon).
+Techniques inspired by MIT projects: [MTMR](https://github.com/Toxblh/MTMR), [Stats](https://github.com/exelban/stats) and [macmon](https://github.com/vladkens/macmon).
 
-O Tato é um projeto independente. **Mac, MacBook Pro e Touch Bar são marcas da Apple Inc. Claude é marca da Anthropic.** Este projeto não é afiliado, patrocinado nem endossado por nenhuma das duas. O robozinho pixelado é uma aproximação desenhada em código, não um arquivo oficial.
+Tato is an independent project. **Mac, MacBook Pro and Touch Bar are trademarks of Apple Inc. Claude is a trademark of Anthropic.** This project is not affiliated with, sponsored by or endorsed by either. The pixel robot is a hand-drawn approximation made in code, not an official asset.
 
-## Em inglês, em resumo
-
-Tato pins a button to the Control Strip of Touch Bar MacBook Pros. Tapping it opens a scrollable bar with CPU/GPU temperature, fan speed, CPU/GPU frequency, memory, network, disk and battery, plus an optional separate Claude mode with your session and weekly limits, extra-usage credit and service status. No sudo, no third-party libraries. Tested on a 13" M1 MacBook Pro; M2 expected to work; Intel is partial and untested. Requires macOS 13+. The UI is in Brazilian Portuguese.
-
-## Licença
+## License
 
 [MIT](LICENSE)

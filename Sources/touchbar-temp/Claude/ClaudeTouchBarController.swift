@@ -137,12 +137,12 @@ final class ClaudeTouchBarController: NSObject, NSTouchBarDelegate {
     private static func title(_ s: Slot) -> String {
         switch s {
         case .icon: return ""
-        case .session: return "SESSÃO 5H"
-        case .weekly: return "SEMANAL 7D"
-        case .credits: return "CRÉDITO"
-        case .today: return "HOJE"
-        case .now: return "AGORA"
-        case .status: return "SERVIÇO"
+        case .session: return tr("SESSÃO 5H", "SESSION 5H")
+        case .weekly: return tr("SEMANAL 7D", "WEEKLY 7D")
+        case .credits: return tr("CRÉDITO", "CREDIT")
+        case .today: return tr("HOJE", "TODAY")
+        case .now: return tr("AGORA", "NOW")
+        case .status: return tr("SERVIÇO", "SERVICE")
         }
     }
 
@@ -184,14 +184,14 @@ final class ClaudeTouchBarController: NSObject, NSTouchBarDelegate {
                 set(slot, "–", Palette.cream, fraction: 0, title: name)
             }
         }
-        limit(.session, "SESSÃO 5H", snap.limits?.sessionPct, snap.limits?.sessionResets)
-        limit(.weekly, "SEMANAL 7D", snap.limits?.weeklyPct, snap.limits?.weeklyResets)
+        limit(.session, tr("SESSÃO 5H", "SESSION 5H"), snap.limits?.sessionPct, snap.limits?.sessionResets)
+        limit(.weekly, tr("SEMANAL 7D", "WEEKLY 7D"), snap.limits?.weeklyPct, snap.limits?.weeklyResets)
         if let c = snap.limits?.credits {
             set(.credits, c.used, Palette.cream, fraction: min(max(c.pct / 100, 0), 1), barColor: Palette.claudeLimit(c.pct),
-                title: "CRÉDITO")
+                title: tr("CRÉDITO", "CREDIT"))
         }
         set(.today, snap.loaded ? ClaudeFormat.tokens(u.tokensToday) : "–")
-        set(.now, snap.isActive ? "ATIVO" : "OCIOSO", snap.isActive ? Palette.clay : Palette.muted)
+        set(.now, snap.isActive ? tr("ATIVO", "ACTIVE") : tr("OCIOSO", "IDLE"), snap.isActive ? Palette.clay : Palette.muted)
         set(.status, snap.status.label, statusColor(snap.status))
     }
 

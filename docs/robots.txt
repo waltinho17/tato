@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://waltinho17.github.io/tato/sitemap.xml

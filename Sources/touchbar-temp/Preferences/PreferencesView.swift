@@ -30,10 +30,10 @@ struct PreferencesView: View {
         VStack(spacing: 12) {
             Picker("", selection: Binding(get: { model.tab }, set: { model.tab = $0 })) {
                 Text("Widgets").tag(0)
-                Text("Geral").tag(1)
-                Text("Alertas").tag(2)
+                Text(tr("Geral", "General")).tag(1)
+                Text(tr("Alertas", "Alerts")).tag(2)
                 Text("Claude").tag(3)
-                Text("Ajuda").tag(4)
+                Text(tr("Ajuda", "Help")).tag(4)
             }
             .pickerStyle(.segmented)
             .labelsHidden()
@@ -58,7 +58,7 @@ struct PreferencesView: View {
         let supported = Set(engine.supported)
         let order = s.widgetOrder.filter(supported.contains)
         return VStack(alignment: .leading, spacing: 6) {
-            Text("Arraste a linha inteira para reordenar. Marque o que aparece na Touch Bar e até 2 itens para o botão fixo. Com muitos widgets, a barra rola com o dedo.")
+            Text(tr("Arraste a linha inteira para reordenar. Marque o que aparece na Touch Bar e até 2 itens para o botão fixo. Com muitos widgets, a barra rola com o dedo.", "Drag a whole row to reorder. Tick what appears on the Touch Bar and up to 2 items for the pinned button. With many widgets, the bar scrolls with your finger."))
                 .font(.callout).foregroundStyle(.secondary)
                 .padding(.horizontal, 20)
             List {
@@ -76,7 +76,7 @@ struct PreferencesView: View {
                             .labelsHidden()
                         Text(MetricStyle.menuName(id))
                         Spacer()
-                        Text("Fixo").foregroundStyle(.secondary)
+                        Text(tr("Fixo", "Pinned")).foregroundStyle(.secondary)
                         Toggle("", isOn: Binding(
                             get: { pinned.contains(id) },
                             set: { on in
@@ -111,8 +111,8 @@ struct PreferencesView: View {
                 try? LoginItem.set(true)
                 model.loginEnabled = LoginItem.isEnabled
                 model.claudeNote = model.loginEnabled
-                    ? "O Tato vai abrir sozinho ao ligar o Mac, para o botão do Claude já aparecer."
-                    : "Não consegui ativar a abertura automática. Ative em Geral."
+                    ? tr("O Tato vai abrir sozinho ao ligar o Mac, para o botão do Claude já aparecer.", "Tato will now open by itself when the Mac starts, so the Claude button is already there.")
+                    : tr("Não consegui ativar a abertura automática. Ative em Geral.", "Could not enable launch at login. Turn it on in General.")
             }
         } else if s.displayMode == .claudeOnly {
             s.displayMode = .both
@@ -129,7 +129,7 @@ struct PreferencesView: View {
             ProgressView(value: min(max((pct ?? 0) / 100, 0), 1))
                 .tint(Color(nsColor: Palette.claudeLimit(pct ?? 0)))
             if let r = ClaudeFormat2.reset(resets) {
-                Text("Reseta em \(r)").font(.caption).foregroundStyle(.secondary)
+                Text(tr("Reseta em \(r)", "Resets in \(r)")).font(.caption).foregroundStyle(.secondary)
             }
         }
         .padding(.vertical, 2)
@@ -140,25 +140,25 @@ struct PreferencesView: View {
         let u = snap.usage
         return Form {
             Section {
-                Toggle("Mostrar o Claude na Touch Bar", isOn: Binding(get: { s.claudeEnabled }, set: { setClaude($0) }))
+                Toggle(tr("Mostrar o Claude na Touch Bar", "Show Claude on the Touch Bar"), isOn: Binding(get: { s.claudeEnabled }, set: { setClaude($0) }))
                 if let note = model.claudeNote { Text(note).font(.caption).foregroundStyle(.secondary) }
-                Toggle("Usar o login do Claude Code (limites reais)", isOn: Binding(get: { s.claudeUseLogin }, set: { s.claudeUseLogin = $0 }))
+                Toggle(tr("Usar o login do Claude Code (limites reais)", "Use the Claude Code login (real limits)"), isOn: Binding(get: { s.claudeUseLogin }, set: { s.claudeUseLogin = $0 }))
                     .disabled(!s.claudeEnabled)
                 if s.claudeEnabled && s.claudeUseLogin {
-                    LabeledContent("Conexão", value: snap.loginState.text + (snap.plan.map { " · plano \($0.capitalized)" } ?? ""))
+                    LabeledContent(tr("Conexão", "Connection"), value: snap.loginState.text + (snap.plan.map { tr(" · plano \($0.capitalized)", " · \($0.capitalized) plan") } ?? ""))
                 }
             }
             if s.claudeEnabled {
-                Section("Limites do plano") {
-                    limitBar("Sessão · janela de 5 horas", snap.limits?.sessionPct, snap.limits?.sessionResets)
-                    limitBar("Semanal · janela de 7 dias", snap.limits?.weeklyPct, snap.limits?.weeklyResets)
+                Section(tr("Limites do plano", "Plan limits")) {
+                    limitBar(tr("Sessão · janela de 5 horas", "Session · 5-hour window"), snap.limits?.sessionPct, snap.limits?.sessionResets)
+                    limitBar(tr("Semanal · janela de 7 dias", "Weekly · 7-day window"), snap.limits?.weeklyPct, snap.limits?.weeklyResets)
                     ForEach(Array((snap.limits?.extras ?? []).enumerated()), id: \.offset) { _, e in
                         limitBar(e.name, e.pct, e.resets)
                     }
                     if let cr = snap.limits?.credits {
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
-                                Text("Crédito extra · mês")
+                                Text(tr("Crédito extra · mês", "Extra credit · month"))
                                 Spacer()
                                 Text("\(cr.used) / \(cr.limit)").font(.title3.bold())
                             }
@@ -168,32 +168,33 @@ struct PreferencesView: View {
                     }
                 }
                 if let origin = snap.limits?.breakdown, !origin.isEmpty {
-                    Section("Semanal por origem") {
+                    Section(tr("Semanal por origem", "Weekly by source")) {
                         ForEach(Array(origin.enumerated()), id: \.offset) { _, o in
-                            LabeledContent(o.name, value: String(format: "%.0f%% do limite", o.pctOfLimit))
+                            LabeledContent(o.name, value: String(format: tr("%.0f%% do limite", "%.0f%% of the limit"), o.pctOfLimit))
                         }
                     }
                 }
-                Section("Claude Code neste Mac") {
-                    LabeledContent("Tokens, últimas 5 horas", value: snap.loaded ? ClaudeFormat.tokens(u.tokens5h) : "–")
-                    LabeledContent("Tokens hoje", value: snap.loaded ? ClaudeFormat.tokens(u.tokensToday) : "–")
-                    LabeledContent("Tokens, 7 dias", value: snap.loaded ? ClaudeFormat.tokens(u.tokens7d) : "–")
-                    LabeledContent("Respostas hoje", value: snap.loaded ? "\(u.messagesToday)" : "–")
-                    LabeledContent("Última atividade", value: snap.loaded ? ClaudeTime.ago(u.lastActivity) : "–")
-                    LabeledContent("Status do serviço", value: snap.status.label)
+                Section(tr("Claude Code neste Mac", "Claude Code on this Mac")) {
+                    LabeledContent(tr("Tokens, últimas 5 horas", "Tokens, last 5 hours"), value: snap.loaded ? ClaudeFormat.tokens(u.tokens5h) : "–")
+                    LabeledContent(tr("Tokens hoje", "Tokens today"), value: snap.loaded ? ClaudeFormat.tokens(u.tokensToday) : "–")
+                    LabeledContent(tr("Tokens, 7 dias", "Tokens, 7 days"), value: snap.loaded ? ClaudeFormat.tokens(u.tokens7d) : "–")
+                    LabeledContent(tr("Respostas hoje", "Responses today"), value: snap.loaded ? "\(u.messagesToday)" : "–")
+                    LabeledContent(tr("Última atividade", "Last activity"), value: snap.loaded ? ClaudeTime.ago(u.lastActivity) : "–")
+                    LabeledContent(tr("Status do serviço", "Service status"), value: snap.status.label)
                 }
                 if !u.modelsToday.isEmpty {
-                    Section("Hoje por modelo") {
+                    Section(tr("Hoje por modelo", "Today by model")) {
                         ForEach(Array(u.modelsToday.prefix(5).enumerated()), id: \.offset) { _, m in
-                            LabeledContent(m.name, value: "\(ClaudeFormat.tokens(m.tokens)) · \(m.responses) respostas")
+                            LabeledContent(m.name, value: "\(ClaudeFormat.tokens(m.tokens)) · \(m.responses) \(tr("respostas", "responses"))")
                         }
                     }
                 }
             }
             Section {
-                Text("Os limites vêm do login que o Claude Code já guarda no Chaveiro, o mesmo usado pelo terminal, pela extensão do VS Code e pelo app. O macOS pede permissão na primeira vez: escolha Permitir sempre. A consulta usa um endereço interno e não documentado da Anthropic, que pode mudar ou limitar chamadas, então o Tato consulta só a cada 5 minutos. Os tokens vêm dos logs locais e o status da página pública status.claude.com. Conversas não são lidas nem enviadas.")
+                Text(tr("Os limites vêm do login que o Claude Code já guarda no Chaveiro, o mesmo usado pelo terminal, pela extensão do VS Code e pelo app. O macOS pede permissão na primeira vez: escolha Permitir sempre. A consulta usa um endereço interno e não documentado da Anthropic, que pode mudar ou limitar chamadas, então o Tato consulta só a cada 5 minutos. Os tokens vêm dos logs locais e o status da página pública status.claude.com. Conversas não são lidas nem enviadas.",
+                        "The limits come from the login Claude Code already keeps in the Keychain, the same one used by the terminal, the VS Code extension and the app. macOS asks for permission the first time: choose Always Allow. The request uses an internal, undocumented Anthropic endpoint that may change or rate-limit, so Tato only asks every 5 minutes. Tokens come from local logs and the status from the public page status.claude.com. Conversations are never read or sent."))
                     .font(.caption).foregroundStyle(.secondary)
-                Button("Atualizar agora") { claude.refreshNow() }.disabled(!s.claudeEnabled)
+                Button(tr("Atualizar agora", "Refresh now")) { claude.refreshNow() }.disabled(!s.claudeEnabled)
             }
         }
         .formStyle(.grouped)
@@ -218,20 +219,27 @@ struct PreferencesView: View {
     private var helpTab: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Como fazer a telemetria aparecer na Touch Bar").font(.title3.bold())
-                step(1, "Deixe a Control Strip visível",
-                     "Em Ajustes do Sistema > Teclado > Configurações da Touch Bar, escolha \"Controles do app\" e mantenha a Control Strip ativada (os nomes podem variar um pouco conforme a versão do macOS). Evite o modo \"Control Strip expandida\".")
-                step(2, "Encontre o botão do app",
-                     "À direita da Touch Bar, junto aos controles de brilho e volume, aparece um botão com os valores, por exemplo 67° · 3.2G. Ele fica visível em qualquer app.")
-                step(3, "Toque para abrir a barra completa",
-                     "Tocar no botão abre todos os widgets. Se houver mais do que cabem, deslize o dedo para os lados. O ✕ fecha e o botão continua lá.")
-                step(4, "Escolha o que mostrar",
-                     "Na aba Widgets, marque o que aparece na barra completa, arraste a linha para mudar a ordem e use \"Fixo\" para escolher até 2 valores do botão.")
-                step(5, "Ajuste a barra de menus",
-                     "Na aba Geral, mostre só valores, valores com rótulo ou apenas o ícone, em negrito se preferir. Clique no ícone da barra de menus para ver o painel completo.")
-                step(6, "Opcional: abrir no login e alertas",
-                     "Ative \"Abrir ao iniciar sessão\" na aba Geral e, na aba Alertas, defina a temperatura que dispara um aviso.")
-                Text("Se o botão não aparecer, confira o passo 1 e abra o app de novo. Se um valor mostrar –, o seu Mac não lê essa métrica. Se algo sumir depois de atualizar o macOS, o menu mostra um aviso em laranja.")
+                Text(tr("Como fazer a telemetria aparecer na Touch Bar", "How to get the telemetry on your Touch Bar")).font(.title3.bold())
+                step(1, tr("Deixe a Control Strip visível", "Keep the Control Strip visible"),
+                     tr("Em Ajustes do Sistema > Teclado > Configurações da Touch Bar, escolha \"Controles do app\" e mantenha a Control Strip ativada (os nomes podem variar um pouco conforme a versão do macOS). Evite o modo \"Control Strip expandida\".",
+                        "In System Settings > Keyboard > Touch Bar Settings, choose \"App Controls\" and keep the Control Strip on (names may vary slightly between macOS versions). Avoid the \"Expanded Control Strip\" mode."))
+                step(2, tr("Encontre o botão do app", "Find the app button"),
+                     tr("À direita da Touch Bar, junto aos controles de brilho e volume, aparece um botão com os valores, por exemplo 67° · 3.2G. Ele fica visível em qualquer app.",
+                        "On the right side of the Touch Bar, next to brightness and volume, a button shows the values, for example 67° · 3.2G. It stays visible in every app."))
+                step(3, tr("Toque para abrir a barra completa", "Tap to open the full bar"),
+                     tr("Tocar no botão abre todos os widgets. Se houver mais do que cabem, deslize o dedo para os lados. O ✕ fecha e o botão continua lá.",
+                        "Tapping the button opens all widgets. If there are more than fit, swipe sideways. The ✕ closes it and the button stays."))
+                step(4, tr("Escolha o que mostrar", "Choose what to show"),
+                     tr("Na aba Widgets, marque o que aparece na barra completa, arraste a linha para mudar a ordem e use \"Fixo\" para escolher até 2 valores do botão.",
+                        "In the Widgets tab, tick what appears on the full bar, drag a row to change the order and use \"Pinned\" to pick up to 2 values for the button."))
+                step(5, tr("Ajuste a barra de menus", "Tune the menu bar"),
+                     tr("Na aba Geral, mostre só valores, valores com rótulo ou apenas o ícone, em negrito se preferir. Clique no ícone da barra de menus para ver o painel completo.",
+                        "In the General tab, show values only, values with labels or just the icon, in bold if you like. Click the menu bar item to see the full panel."))
+                step(6, tr("Opcional: abrir no login e alertas", "Optional: launch at login and alerts"),
+                     tr("Ative \"Abrir ao iniciar sessão\" na aba Geral e, na aba Alertas, defina a temperatura que dispara um aviso.",
+                        "Turn on \"Launch at login\" in General and, in Alerts, set the temperature that triggers a notification."))
+                Text(tr("Se o botão não aparecer, confira o passo 1 e abra o app de novo. Se um valor mostrar –, o seu Mac não lê essa métrica. Se algo sumir depois de atualizar o macOS, o menu mostra um aviso em laranja.",
+                        "If the button does not appear, check step 1 and reopen the app. A value showing – means your Mac cannot read that metric. If something disappears after a macOS update, the menu shows an orange warning."))
                     .font(.callout).foregroundStyle(Color.primary.opacity(0.8)).fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, 26)
@@ -243,28 +251,33 @@ struct PreferencesView: View {
 
     private var generalTab: some View {
         Form {
-            Picker("Touch Bar mostra", selection: Binding(
+            Picker(tr("Idioma", "Language"), selection: Binding(get: { s.languageChoice }, set: { s.languageChoice = $0 })) {
+                Text(tr("Automático", "Automatic")).tag("auto")
+                Text("Português").tag("pt")
+                Text("English").tag("en")
+            }
+            Picker(tr("Touch Bar mostra", "Touch Bar shows"), selection: Binding(
                 get: { s.claudeEnabled ? s.displayMode : .macOnly },
                 set: { m in if m == .claudeOnly || m == .both { if !s.claudeEnabled { setClaude(true) } }; s.displayMode = m })) {
-                Text("Mac e Claude").tag(Settings.DisplayMode.both)
-                Text("Só métricas do Mac").tag(Settings.DisplayMode.macOnly)
-                Text("Só Claude").tag(Settings.DisplayMode.claudeOnly)
+                Text(tr("Mac e Claude", "Mac and Claude")).tag(Settings.DisplayMode.both)
+                Text(tr("Só métricas do Mac", "Mac metrics only")).tag(Settings.DisplayMode.macOnly)
+                Text(tr("Só Claude", "Claude only")).tag(Settings.DisplayMode.claudeOnly)
             }
-            Picker("Barra de menus", selection: Binding(get: { s.menuBarMode }, set: { s.menuBarMode = $0 })) {
-                Text("Somente valores").tag(Settings.MenuBarMode.values)
-                Text("Valores com rótulo").tag(Settings.MenuBarMode.labeled)
-                Text("Somente ícone").tag(Settings.MenuBarMode.icon)
+            Picker(tr("Barra de menus", "Menu bar"), selection: Binding(get: { s.menuBarMode }, set: { s.menuBarMode = $0 })) {
+                Text(tr("Somente valores", "Values only")).tag(Settings.MenuBarMode.values)
+                Text(tr("Valores com rótulo", "Values with labels")).tag(Settings.MenuBarMode.labeled)
+                Text(tr("Somente ícone", "Icon only")).tag(Settings.MenuBarMode.icon)
             }
-            Toggle("Texto em negrito", isOn: Binding(get: { s.menuBarBold }, set: { s.menuBarBold = $0 }))
+            Toggle(tr("Texto em negrito", "Bold text"), isOn: Binding(get: { s.menuBarBold }, set: { s.menuBarBold = $0 }))
                 .disabled(s.menuBarMode == .icon)
-            Toggle("Cores por faixa (verde, laranja, vermelho)", isOn: Binding(get: { s.useColors }, set: { s.useColors = $0 }))
-            Picker("Atualizar a cada", selection: Binding(get: { s.refreshInterval }, set: { s.refreshInterval = $0 })) {
-                Text("2 segundos").tag(2.0)
-                Text("3 segundos").tag(3.0)
-                Text("5 segundos").tag(5.0)
+            Toggle(tr("Cores por faixa (verde, laranja, vermelho)", "Colours by range (green, orange, red)"), isOn: Binding(get: { s.useColors }, set: { s.useColors = $0 }))
+            Picker(tr("Atualizar a cada", "Refresh every"), selection: Binding(get: { s.refreshInterval }, set: { s.refreshInterval = $0 })) {
+                Text(tr("2 segundos", "2 seconds")).tag(2.0)
+                Text(tr("3 segundos", "3 seconds")).tag(3.0)
+                Text(tr("5 segundos", "5 seconds")).tag(5.0)
             }
             Section {
-            Toggle("Abrir ao iniciar sessão", isOn: Binding(
+            Toggle(tr("Abrir ao iniciar sessão", "Launch at login"), isOn: Binding(
                 get: { model.loginEnabled },
                 set: { on in
                     do { try LoginItem.set(on); model.loginError = nil }
@@ -272,7 +285,7 @@ struct PreferencesView: View {
                     model.loginEnabled = LoginItem.isEnabled
                 }))
             if let e = model.loginError { Text(e).font(.caption).foregroundStyle(.red) }
-            Text("Funciona melhor com o app na pasta Aplicativos.").font(.caption).foregroundStyle(.secondary)
+            Text(tr("Funciona melhor com o app na pasta Aplicativos.", "Works best with the app in the Applications folder.")).font(.caption).foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)
@@ -284,16 +297,17 @@ struct PreferencesView: View {
 
     private var alertsTab: some View {
         Form {
-            Toggle("Avisar quando a temperatura passar do limite", isOn: Binding(
+            Toggle(tr("Avisar quando a temperatura passar do limite", "Notify me when the temperature passes the limit"), isOn: Binding(
                 get: { s.alertsEnabled },
                 set: { on in s.alertsEnabled = on; if on { alerts.requestAuthorization() } }))
-            Picker("Limite (CPU ou GPU)", selection: Binding(get: { s.alertThreshold }, set: { s.alertThreshold = $0 })) {
+            Picker(tr("Limite (CPU ou GPU)", "Limit (CPU or GPU)"), selection: Binding(get: { s.alertThreshold }, set: { s.alertThreshold = $0 })) {
                 ForEach([80.0, 85.0, 90.0, 95.0, 100.0], id: \.self) { Text(String(format: "%.0f °C", $0)).tag($0) }
             }
             .disabled(!s.alertsEnabled)
-            Button("Enviar notificação de teste") { alerts.requestAuthorization(); alerts.sendTest() }
+            Button(tr("Enviar notificação de teste", "Send a test notification")) { alerts.requestAuthorization(); alerts.sendTest() }
                 .disabled(!s.alertsEnabled)
-            Text("O aviso dispara uma vez por pico e só volta a disparar depois que a temperatura cair 5 °C abaixo do limite, com intervalo mínimo de 10 minutos.")
+            Text(tr("O aviso dispara uma vez por pico e só volta a disparar depois que a temperatura cair 5 °C abaixo do limite, com intervalo mínimo de 10 minutos.",
+                    "The alert fires once per spike and only re-arms after the temperature drops 5 °C below the limit, with a minimum of 10 minutes between alerts."))
                 .font(.caption).foregroundStyle(.secondary)
         }
         .formStyle(.grouped)
@@ -317,7 +331,7 @@ final class PreferencesWindowController {
         if window == nil {
             let w = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 500, height: 470),
                              styleMask: [.titled, .closable, .fullSizeContentView], backing: .buffered, defer: false)
-            w.title = "Preferências"
+            w.title = tr("Preferências", "Preferences")
             w.isReleasedWhenClosed = false
             w.titlebarAppearsTransparent = true
 

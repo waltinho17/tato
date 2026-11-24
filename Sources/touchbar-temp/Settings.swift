@@ -29,11 +29,17 @@ final class Settings {
         set { save("widgetOrder", newValue) }
     }
 
+    /// "auto" follows the system language; "pt" or "en" force one.
+    var languageChoice: String {
+        get { d.string(forKey: "language") ?? "auto" }
+        set { d.set(newValue, forKey: "language"); NotificationCenter.default.post(name: Settings.didChange, object: nil) }
+    }
+
     /// What the Touch Bar shows when the Claude mode is on.
     enum DisplayMode: String { case both, macOnly, claudeOnly }
 
     var displayMode: DisplayMode {
-        get { DisplayMode(rawValue: d.string(forKey: "displayMode") ?? "") ?? .both }
+        get { ClaudeEngine.demo ? .both : (DisplayMode(rawValue: d.string(forKey: "displayMode") ?? "") ?? .both) }
         set { d.set(newValue.rawValue, forKey: "displayMode"); NotificationCenter.default.post(name: Settings.didChange, object: nil) }
     }
 

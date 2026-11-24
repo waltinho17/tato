@@ -1,6 +1,6 @@
 APP      = Tato
 BINARY   = touchbar-temp
-VERSION  = 2.0.0
+VERSION  = 2.1.0
 SOURCES  = $(shell find Sources/$(BINARY) -name "*.swift")
 BUNDLE   = $(APP).app
 PKG      = Tato-v$(VERSION).pkg

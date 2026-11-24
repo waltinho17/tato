@@ -108,10 +108,10 @@ enum ClaudeTime {
     static func ago(_ d: Date?, now: Date = Date()) -> String {
         guard let d else { return "–" }
         let s = Int(now.timeIntervalSince(d))
-        if s < 60 { return "agora" }
-        if s < 3600 { return "há \(s / 60) min" }
-        if s < 86_400 { return "há \(s / 3600) h" }
-        return "há \(s / 86_400) d"
+        if s < 60 { return tr("agora", "now") }
+        if s < 3600 { return tr("há \(s / 60) min", "\(s / 60) min ago") }
+        if s < 86_400 { return tr("há \(s / 3600) h", "\(s / 3600) h ago") }
+        return tr("há \(s / 86_400) d", "\(s / 86_400) d ago")
     }
 }
 
@@ -121,8 +121,8 @@ enum ClaudeServiceStatus {
     var label: String {
         switch self {
         case .operational: return "OK"
-        case .degraded: return "LENTO"
-        case .outage: return "FORA"
+        case .degraded: return tr("LENTO", "SLOW")
+        case .outage: return tr("FORA", "DOWN")
         case .unknown: return "–"
         }
     }

@@ -49,16 +49,16 @@ enum ClaudeLoginState: Equatable {
 
     var text: String {
         switch self {
-        case .disabled: return "Desligado"
-        case .waiting: return "Conectando…"
-        case .ok: return "Conectado"
-        case .noLogin: return "Claude Code sem login neste Mac"
-        case .denied: return "Acesso ao Chaveiro negado"
-        case .expired: return "Login expirado: abra o Claude Code para renovar"
+        case .disabled: return tr("Desligado", "Off")
+        case .waiting: return tr("Conectando…", "Connecting…")
+        case .ok: return tr("Conectado", "Connected")
+        case .noLogin: return tr("Claude Code sem login neste Mac", "Claude Code is not signed in on this Mac")
+        case .denied: return tr("Acesso ao Chaveiro negado", "Keychain access denied")
+        case .expired: return tr("Login expirado: abra o Claude Code para renovar", "Login expired: open Claude Code to renew it")
         case .rateLimited(let d):
             let f = DateFormatter(); f.timeStyle = .short
-            return "Limite de consultas, nova tentativa às \(f.string(from: d))"
-        case .failed(let why): return "Falhou: \(why)"
+            return tr("Limite de consultas, nova tentativa às \(f.string(from: d))", "Rate limited, retrying at \(f.string(from: d))")
+        case .failed(let why): return tr("Falhou: \(why)", "Failed: \(why)")
         }
     }
 }
@@ -69,7 +69,7 @@ enum ClaudeFormat2 {
         let f = NumberFormatter()
         f.numberStyle = .currency
         f.currencyCode = currency
-        f.locale = Locale(identifier: "pt_BR")
+        f.locale = Lang.locale
         f.minimumFractionDigits = minor % Int(pow(10, Double(exponent))) == 0 ? 0 : exponent
         f.maximumFractionDigits = exponent
         return f.string(from: NSNumber(value: Double(minor) / pow(10, Double(exponent)))) ?? "\(minor)"
@@ -79,7 +79,7 @@ enum ClaudeFormat2 {
     static func reset(_ date: Date?, now: Date = Date()) -> String? {
         guard let date else { return nil }
         let s = Int(date.timeIntervalSince(now))
-        if s <= 0 { return "agora" }
+        if s <= 0 { return tr("agora", "now") }
         let d = s / 86_400, h = (s % 86_400) / 3600, m = (s % 3600) / 60
         if d > 0 { return "\(d)d \(h)h" }
         if h > 0 { return String(format: "%dh%02dm", h, m) }
@@ -155,7 +155,7 @@ final class ClaudeLimitsClient {
             case .ok(let t, let e, let p): token = (t, e, p)
             case .notFound: return Outcome(state: .noLogin)
             case .denied: return Outcome(state: .denied)
-            case .malformed: return Outcome(state: .failed("formato de login desconhecido"))
+            case .malformed: return Outcome(state: .failed(tr("formato de login desconhecido", "unknown login format")))
             }
         }
         guard let tk = token else { return Outcome(state: .noLogin) }
@@ -174,7 +174,7 @@ final class ClaudeLimitsClient {
         sem.wait()
 
         if let err { return Outcome(state: .failed(err.localizedDescription), plan: tk.plan) }
-        guard let http else { return Outcome(state: .failed("sem resposta"), plan: tk.plan) }
+        guard let http else { return Outcome(state: .failed(tr("sem resposta", "no response")), plan: tk.plan) }
         switch http.statusCode {
         case 200: break
         case 401, 403: token = nil; return Outcome(state: .expired, plan: tk.plan)
@@ -185,7 +185,7 @@ final class ClaudeLimitsClient {
         }
         guard let data, let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let limits = Self.parse(obj) else {
-            return Outcome(state: .failed("resposta inesperada"), plan: tk.plan)
+            return Outcome(state: .failed(tr("resposta inesperada", "unexpected response")), plan: tk.plan)
         }
         return Outcome(limits: limits, state: .ok, plan: tk.plan)
     }
@@ -196,10 +196,10 @@ final class ClaudeLimitsClient {
 
     private static func prettyWindow(_ key: String) -> String {
         switch key {
-        case "seven_day_opus": return "Semanal · Opus"
-        case "seven_day_sonnet": return "Semanal · Sonnet"
-        case "seven_day_oauth_apps": return "Semanal · apps"
-        default: return key.replacingOccurrences(of: "seven_day", with: "Semanal").replacingOccurrences(of: "_", with: " ").capitalized
+        case "seven_day_opus": return tr("Semanal", "Weekly") + " · Opus"
+        case "seven_day_sonnet": return tr("Semanal", "Weekly") + " · Sonnet"
+        case "seven_day_oauth_apps": return tr("Semanal", "Weekly") + " · apps"
+        default: return key.replacingOccurrences(of: "seven_day", with: tr("Semanal", "Weekly")).replacingOccurrences(of: "_", with: " ").capitalized
         }
     }
 

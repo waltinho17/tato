@@ -150,8 +150,8 @@ enum DashboardModel {
 
         func stats(_ id: MetricID) -> [(String, String)]? {
             guard sup.contains(id) else { return nil }
-            guard let st = engine.stats[id], st.count > 1 else { return [("mín", "–"), ("méd", "–"), ("máx", "–")] }
-            return [("mín", MetricStyle.number(id, st.min)), ("méd", MetricStyle.number(id, st.avg)), ("máx", MetricStyle.number(id, st.max))]
+            guard let st = engine.stats[id], st.count > 1 else { return [(tr("mín", "min"), "–"), (tr("méd", "avg"), "–"), (tr("máx", "max"), "–")] }
+            return [(tr("mín", "min"), MetricStyle.number(id, st.min)), (tr("méd", "avg"), MetricStyle.number(id, st.avg)), (tr("máx", "max"), MetricStyle.number(id, st.max))]
         }
         func tint(_ id: MetricID) -> NSColor { useColors ? MetricStyle.color(id, snap[id]) : .labelColor }
         func shown(_ id: MetricID) -> String? { sup.contains(id) ? MetricStyle.text(snap[id]) : nil }
@@ -170,13 +170,13 @@ enum DashboardModel {
         if sup.contains(.cpuUsage) {
             var st: [(String, String)]?
             if let e = engine.cpuUsage.efficiencyUsage, let p = engine.cpuUsage.performanceUsage {
-                st = [("núcleos E", pct(e)), ("núcleos P", pct(p))]
+                st = [(tr("núcleos E", "E-cores"), pct(e)), (tr("núcleos P", "P-cores"), pct(p))]
             }
-            processor.append(DashRow(title: "Uso da CPU", value: MetricStyle.text(snap[.cpuUsage]), color: tint(.cpuUsage),
+            processor.append(DashRow(title: tr("Uso da CPU", "CPU usage"), value: MetricStyle.text(snap[.cpuUsage]), color: tint(.cpuUsage),
                                      fraction: MetricStyle.fraction(snap[.cpuUsage]), stats: st, spark: spark(.cpuUsage)))
         }
         if sup.contains(.fanRPM) {
-            processor.append(DashRow(title: "Cooler", value: MetricStyle.text(snap[.fanRPM]) + " rpm",
+            processor.append(DashRow(title: tr("Cooler", "Fan"), value: MetricStyle.text(snap[.fanRPM]) + " rpm",
                                      stats: stats(.fanRPM), spark: spark(.fanRPM)))
         }
 
@@ -197,24 +197,24 @@ enum DashboardModel {
         }
 
         var out: [DashSection] = []
-        if !processor.isEmpty { out.append(DashSection(title: "CPU, GPU e cooler", rows: processor)) }
+        if !processor.isEmpty { out.append(DashSection(title: tr("CPU, GPU e cooler", "CPU, GPU & fan"), rows: processor)) }
 
-        let mem = [usage(.memory, "RAM", detail: true), usage(.memPressure, "Pressão", detail: false, withStats: false)].compactMap { $0 }
-        if !mem.isEmpty { out.append(DashSection(title: "Memória", rows: mem)) }
+        let mem = [usage(.memory, "RAM", detail: true), usage(.memPressure, tr("Pressão", "Pressure"), detail: false, withStats: false)].compactMap { $0 }
+        if !mem.isEmpty { out.append(DashSection(title: tr("Memória", "Memory"), rows: mem)) }
 
-        let io = [pair(.netDown, .netUp, "Rede"), pair(.diskRead, .diskWrite, "Disco (E/S)")].compactMap { $0 }
-        if !io.isEmpty { out.append(DashSection(title: "Rede e disco", rows: io)) }
+        let io = [pair(.netDown, .netUp, tr("Rede", "Network")), pair(.diskRead, .diskWrite, tr("Disco (E/S)", "Disk I/O"))].compactMap { $0 }
+        if !io.isEmpty { out.append(DashSection(title: tr("Rede e disco", "Network & disk"), rows: io)) }
 
         var storage = [usage(.disk, "SSD", detail: true, withStats: false)].compactMap { $0 }
-        if var bat = usage(.battery, "Bateria", detail: false, withStats: false) {
+        if var bat = usage(.battery, tr("Bateria", "Battery"), detail: false, withStats: false) {
             if let b = engine.system.batteryDetails {
-                bat.stats = [("saúde", b.health.map { String(format: "%.0f%%", $0) } ?? "–"),
-                             ("ciclos", b.cycles.map(String.init) ?? "–"),
-                             ("", b.charging ? "carregando" : (b.pluggedIn ? "na tomada" : "na bateria"))]
+                bat.stats = [(tr("saúde", "health"), b.health.map { String(format: "%.0f%%", $0) } ?? "–"),
+                             (tr("ciclos", "cycles"), b.cycles.map(String.init) ?? "–"),
+                             ("", b.charging ? tr("carregando", "charging") : (b.pluggedIn ? tr("na tomada", "plugged in") : tr("na bateria", "on battery")))]
             }
             storage.append(bat)
         }
-        if !storage.isEmpty { out.append(DashSection(title: "Armazenamento e bateria", rows: storage)) }
+        if !storage.isEmpty { out.append(DashSection(title: tr("Armazenamento e bateria", "Storage & battery"), rows: storage)) }
 
         // Claude (only when the Claude mode is on), always in Claude's own colours
         if let c = claude {
@@ -223,29 +223,29 @@ enum DashboardModel {
                 guard let pct else { return }
                 rows.append(DashRow(title: title, value: String(format: "%.0f%%", pct), color: Palette.claudeLimit(pct),
                                     fraction: min(max(pct / 100, 0), 1),
-                                    stats: ClaudeFormat2.reset(resets).map { [("reseta em", $0)] }))
+                                    stats: ClaudeFormat2.reset(resets).map { [(tr("reseta em", "resets in"), $0)] }))
             }
-            limitRow("Sessão · 5 horas", c.limits?.sessionPct, c.limits?.sessionResets)
-            limitRow("Semanal · 7 dias", c.limits?.weeklyPct, c.limits?.weeklyResets)
+            limitRow(tr("Sessão · 5 horas", "Session · 5 hours"), c.limits?.sessionPct, c.limits?.sessionResets)
+            limitRow(tr("Semanal · 7 dias", "Weekly · 7 days"), c.limits?.weeklyPct, c.limits?.weeklyResets)
             if let origin = c.limits?.breakdown?.filter({ $0.pctOfLimit > 0 }), !origin.isEmpty {
-                rows.append(DashRow(title: "Semanal por origem", value: "",
+                rows.append(DashRow(title: tr("Semanal por origem", "Weekly by source"), value: "",
                                     stats: origin.map { ($0.name, String(format: "%.0f%%", $0.pctOfLimit)) }))
             }
             if let cr = c.limits?.credits {
-                rows.append(DashRow(title: "Crédito extra · mês", value: "\(cr.used) / \(cr.limit)", color: Palette.claudeLimit(cr.pct),
-                                    fraction: min(max(cr.pct / 100, 0), 1), stats: [("usado", String(format: "%.0f%%", cr.pct))]))
+                rows.append(DashRow(title: tr("Crédito extra · mês", "Extra credit · month"), value: "\(cr.used) / \(cr.limit)", color: Palette.claudeLimit(cr.pct),
+                                    fraction: min(max(cr.pct / 100, 0), 1), stats: [(tr("usado", "used"), String(format: "%.0f%%", cr.pct))]))
             }
             for e in c.limits?.extras ?? [] { limitRow(e.name, e.pct, e.resets) }
             if c.loaded {
-                var today = DashRow(title: "Hoje", value: "\(ClaudeFormat.tokens(c.usage.tokensToday)) · \(c.usage.messagesToday) respostas",
+                var today = DashRow(title: tr("Hoje", "Today"), value: "\(ClaudeFormat.tokens(c.usage.tokensToday)) · \(c.usage.messagesToday) \(tr("respostas", "responses"))",
                                     color: Palette.cream)
                 today.stats = c.usage.modelsToday.prefix(3).map { ($0.name, ClaudeFormat.tokens($0.tokens)) }
                 if today.stats?.isEmpty ?? true { today.stats = nil }
                 rows.append(today)
                 rows.append(DashRow(title: "Tokens", value: "5 h \(ClaudeFormat.tokens(c.usage.tokens5h)) · 7 d \(ClaudeFormat.tokens(c.usage.tokens7d))",
                                     color: Palette.cream,
-                                    stats: [("serviço", c.status.label), ("agora", c.isActive ? "ativo" : "ocioso"),
-                                            ("última", ClaudeTime.ago(c.usage.lastActivity))]))
+                                    stats: [(tr("serviço", "service"), c.status.label), (tr("agora", "now"), c.isActive ? tr("ativo", "active") : tr("ocioso", "idle")),
+                                            (tr("última", "last"), ClaudeTime.ago(c.usage.lastActivity))]))
             }
             out.append(DashSection(title: "Claude" + (c.plan.map { " · \($0.capitalized)" } ?? ""), rows: rows))
         }
@@ -254,13 +254,13 @@ enum DashboardModel {
         let ps = engine.processes
         let byCPU = ps.topCPU(), byMem = ps.topMemory()
         if !byMem.isEmpty {
-            var rows = [DashRow(style: .processHeader, title: "POR CPU", value: "", right: ("POR RAM", ""))]
+            var rows = [DashRow(style: .processHeader, title: tr("POR CPU", "BY CPU"), value: "", right: (tr("POR RAM", "BY RAM"), ""))]
             for i in 0..<min(byCPU.count, byMem.count) {
                 let c = byCPU[i], m = byMem[i]
                 rows.append(DashRow(style: .process, title: c.name, value: ps.hasCPU ? String(format: "%.0f%%", c.cpu) : "…",
                                     right: (m.name, String(format: "%.1f GB", Double(m.memory) / 1_073_741_824))))
             }
-            out.append(DashSection(title: "Processos", rows: rows))
+            out.append(DashSection(title: tr("Processos", "Processes"), rows: rows))
         }
         return out
     }

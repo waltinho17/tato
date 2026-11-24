@@ -17,6 +17,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         ClaudeEngine.demo = CommandLine.arguments.contains("--demo")
+        if let i = CommandLine.arguments.firstIndex(of: "--lang"), i + 1 < CommandLine.arguments.count {
+            Lang.override = CommandLine.arguments[i + 1] == "pt" ? .pt : .en
+        }
         let os = ProcessInfo.processInfo.operatingSystemVersionString
         if let known = UserDefaults.standard.string(forKey: "lastOSVersion"), known != os { osChanged = true }
         UserDefaults.standard.set(os, forKey: "lastOSVersion")
@@ -159,12 +162,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     /// Warnings about sensors or private APIs that stopped working (e.g. after a macOS update).
     private func warnings() -> [String] {
         var w: [String] = []
-        if !PrivateTouchBar.functionsAvailable { w.append("API da Touch Bar indisponível: o item fixo pode não aparecer.") }
+        if !PrivateTouchBar.functionsAvailable { w.append(tr("API da Touch Bar indisponível: o item fixo pode não aparecer.", "Touch Bar API unavailable: the button may not appear.")) }
         let broken = engine.degraded
         if !broken.isEmpty {
-            w.append("Sem leitura: " + broken.map(MetricStyle.menuName).joined(separator: ", ") + ". Uma API do macOS pode ter mudado.")
+            w.append(tr("Sem leitura: ", "No reading: ") + broken.map(MetricStyle.menuName).joined(separator: ", ") + tr(". Uma API do macOS pode ter mudado.", ". A macOS API may have changed."))
         }
-        if osChanged { w.append("macOS atualizado desde a última execução. Se algo sumiu, rode make probe.") }
+        if osChanged { w.append(tr("macOS atualizado desde a última execução. Se algo sumiu, rode make probe.", "macOS was updated since the last run. If something disappeared, run make probe.")) }
         return w
     }
 
@@ -184,17 +187,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             menu.addItem(it)
         }
 
-        let clear = NSMenuItem(title: "Limpar mín/méd/máx", action: #selector(clearStats), keyEquivalent: "l")
+        let clear = NSMenuItem(title: tr("Limpar mín/méd/máx", "Reset min/avg/max"), action: #selector(clearStats), keyEquivalent: "l")
         clear.target = self
         menu.addItem(clear)
-        let help = NSMenuItem(title: "Como configurar a Touch Bar…", action: #selector(showHelp), keyEquivalent: "")
+        let help = NSMenuItem(title: tr("Como configurar a Touch Bar…", "How to set up the Touch Bar…"), action: #selector(showHelp), keyEquivalent: "")
         help.target = self
         menu.addItem(help)
-        let prefs = NSMenuItem(title: "Preferências…", action: #selector(showPreferences), keyEquivalent: ",")
+        let prefs = NSMenuItem(title: tr("Preferências…", "Preferences…"), action: #selector(showPreferences), keyEquivalent: ",")
         prefs.target = self
         menu.addItem(prefs)
         menu.addItem(.separator())
-        menu.addItem(NSMenuItem(title: "Sair", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: tr("Sair", "Quit"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
     }
 
     @objc private func clearStats() { engine.resetStats() }

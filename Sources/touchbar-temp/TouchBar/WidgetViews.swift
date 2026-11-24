@@ -19,7 +19,7 @@ enum MetricStyle {
         case .memory: return "RAM"
         case .battery: return "BAT"
         case .cpuUsage: return "CPU %"
-        case .memPressure: return "PRESSÃO"
+        case .memPressure: return tr("PRESSÃO", "PRESSURE")
         case .diskRead: return "DISK ↓"
         case .diskWrite: return "DISK ↑"
         case .netDown: return "NET ↓"
@@ -29,20 +29,20 @@ enum MetricStyle {
 
     static func menuName(_ id: MetricID) -> String {
         switch id {
-        case .cpuTemp: return "Temperatura da CPU"
-        case .gpuTemp: return "Temperatura da GPU"
-        case .fanRPM: return "Rotação do cooler"
-        case .cpuFreq: return "Frequência da CPU"
-        case .gpuFreq: return "Frequência da GPU"
-        case .disk: return "Armazenamento"
-        case .memory: return "Memória"
-        case .battery: return "Bateria"
-        case .cpuUsage: return "Uso da CPU"
-        case .memPressure: return "Pressão de memória"
-        case .diskRead: return "Disco: leitura"
-        case .diskWrite: return "Disco: escrita"
-        case .netDown: return "Rede: download"
-        case .netUp: return "Rede: upload"
+        case .cpuTemp: return tr("Temperatura da CPU", "CPU temperature")
+        case .gpuTemp: return tr("Temperatura da GPU", "GPU temperature")
+        case .fanRPM: return tr("Rotação do cooler", "Fan speed")
+        case .cpuFreq: return tr("Frequência da CPU", "CPU frequency")
+        case .gpuFreq: return tr("Frequência da GPU", "GPU frequency")
+        case .disk: return tr("Armazenamento", "Storage")
+        case .memory: return tr("Memória", "Memory")
+        case .battery: return tr("Bateria", "Battery")
+        case .cpuUsage: return tr("Uso da CPU", "CPU usage")
+        case .memPressure: return tr("Pressão de memória", "Memory pressure")
+        case .diskRead: return tr("Disco: leitura", "Disk: read")
+        case .diskWrite: return tr("Disco: escrita", "Disk: write")
+        case .netDown: return tr("Rede: download", "Network: download")
+        case .netUp: return tr("Rede: upload", "Network: upload")
         }
     }
 
